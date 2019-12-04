@@ -53,7 +53,8 @@ $(function(){
     $.post('/tasks', payload).success(function(data) {
       $('.todo-list').append(taskHtml(data));
       $('.toggle').change(toggleTask);
+      $('.new-todo').val('');
     });  
   });  
-  
+
 });
