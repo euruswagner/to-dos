@@ -4,12 +4,14 @@ $(function(){
   // <li> tags
   function taskHtml(task) {
     var checkedStatus = task.done ? "checked" : "";
-    var liElement = '<li><div class="view"><input class="toggle" type="checkbox"' +
+    var liClass = task.done ? "completed" : "";
+    var liElement = '<li id="listItem-' + task.id + '" class="' + liClass + '">' +
+    '<div class="view"><input class="toggle" type="checkbox"' +
     ' data-id="' + task.id + '"' +
     checkedStatus +
     '><label>' +
     task.title +
-    '</label></div></li>';
+    '</label><button id="' + task.id + '" class="destroy"></button></div></li>';
     
     return liElement;
   }
@@ -27,7 +29,24 @@ $(function(){
       task: {
         done: doneValue
       }
+    }).success(function(data) {
+      $('#listItem-' + data.id).replaceWith(taskHtml(data));
+      $('.toggle').change(toggleTask);
+      $('.destroy').click(deleteTask);
     });
+  }
+
+  function deleteTask(e) {
+    var del = confirm('Are you sure you want to delete this item?');
+    if (del===true) {
+      $.post('/tasks/' + e.target.id, {
+        _method: 'DELETE'
+      }).success(function() {
+        $('#listItem-' + e.target.id).replaceWith();
+      });
+    }
+    else
+      return 
   }
 
   $.get('/tasks').success( function( data ) {
@@ -40,7 +59,10 @@ $(function(){
     $('.todo-list').html(htmlString);
 
     $('.toggle').change(toggleTask);
-  });
+
+    $('.destroy').click(deleteTask);
+      
+    });
 
   $('#new-form').submit(function(event){
     event.preventDefault();
@@ -53,8 +75,9 @@ $(function(){
     $.post('/tasks', payload).success(function(data) {
       $('.todo-list').append(taskHtml(data));
       $('.toggle').change(toggleTask);
+      $('.destroy').click(deleteTask);
       $('.new-todo').val('');
     });  
-  });  
+  }); 
 
 });

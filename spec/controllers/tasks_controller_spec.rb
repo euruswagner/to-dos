@@ -6,6 +6,7 @@ RSpec.describe TasksController, type: :controller do
       task1 = FactoryBot.create(:task)
       task2 = FactoryBot.create(:task)
       task1.update_attributes(title: "something else")
+      
       get :index
       expect(response).to have_http_status :success
       response_value = ActiveSupport::JSON.decode(@response.body)
@@ -20,6 +21,7 @@ RSpec.describe TasksController, type: :controller do
   describe "tasks#update" do
     it "should allow tasks to be marked as done" do
       task = FactoryBot.create(:task, done: false)
+      
       put :update, params: {id: task.id, task: {done: true}}
       expect(response).to have_http_status(:success)
       task.reload
@@ -34,6 +36,16 @@ RSpec.describe TasksController, type: :controller do
       response_value = ActiveSupport::JSON.decode(@response.body)
       expect(response_value['title']).to eq('Fix Things')
       expect(Task.last.title).to eq('Fix Things')
+    end
+  end
+
+  describe "tasks#destroy" do
+    it "should allow tasks to be destroyed" do
+      task = FactoryBot.create(:task)
+
+      delete :destroy, params: {id: task.id}
+      task = Task.find_by_id(task.id)
+      expect(task).to eq nil
     end
   end
 end
